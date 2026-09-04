@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hệ thống phát hiện xâm nhập mạng (IDS) - Giám sát và phân tích lưu lượng mạng real-time">
+    <title>🛡️ IDS Dashboard - Hệ thống Phát hiện Xâm nhập Mạng</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">🛡️</div>
+                    <div class="logo-text">
+                        <h1>IDS Monitor</h1>
+                        <span>Network Intrusion Detection System</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-center">
+                <!-- Sniffer Controls -->
+                <div class="sniffer-controls">
+                    <div class="sniffer-status" id="snifferStatus">
+                        <span class="sniffer-dot" id="snifferDot"></span>
+                        <span id="snifferStatusText">Đang khởi động...</span>
+                    </div>
+                    <button class="btn-control btn-stop" id="btnStopSniffer" title="Dừng bắt gói tin">
+                        <span class="btn-icon">⏹</span> Dừng
+                    </button>
+                    <button class="btn-control btn-start" id="btnStartSniffer" title="Bắt đầu bắt gói tin" style="display:none;">
+                        <span class="btn-icon">▶</span> Bắt đầu
+                    </button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="interface-display" id="interfaceDisplay" title="Network interface đang dùng">
+                    🌐 <span id="interfaceName">--</span>
+                </div>
+                <div class="status-badge" id="connectionBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Đang kết nối...</span>
+                </div>
+                <div class="uptime-display">
+                    ⏱️ <span id="uptimeDisplay">00:00:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+
+        <!-- ========== STATS CARDS ========== -->
+        <section class="stats-grid">
+            <!-- Total Packets -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tổng gói tin</span>
+                    <div class="stat-card-icon">📦</div>
+                </div>
+                <div class="stat-card-value" id="totalPackets">0</div>
+                <div class="stat-card-sub">Tổng số packets đã bắt</div>
+            </div>
+
+            <!-- Packets/sec -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tốc độ</span>
+                    <div class="stat-card-icon">⚡</div>
+                </div>
+                <div class="stat-card-value"><span id="packetsPerSec">0</span></div>
+                <div class="stat-card-sub">Packets / giây</div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Cảnh báo</span>
+                    <div class="stat-card-icon">🚨</div>
+                </div>
+                <div class="stat-card-value" id="totalAlerts">0</div>
+                <div class="stat-card-sub">Tổng số cảnh báo</div>
+            </div>
+
+            <!-- Bytes -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Dữ liệu nhận</span>
+                    <div class="stat-card-icon">📊</div>
+                </div>
+                <div class="stat-card-value" id="bytesRecv">0 B</div>
+                <div class="stat-card-sub">Tổng bytes đã nhận</div>
+            </div>
+        </section>
+
+        <!-- ========== CHARTS ROW 1 ========== -->
+        <section class="charts-grid">
+            <!-- Traffic Timeline -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <span class="chart-title-icon">📈</span>
+                        Lưu lượng mạng theo thời gian
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Protocol Distribution -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <span class="chart-title-icon">🔵</span>
+                        Phân bố Protocol
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="protocolChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== CHARTS ROW 2 ========== -->
+        <section class="charts-grid-2">
+            <!-- Top Source IPs -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <span class="chart-title-icon">🌐</span>
+                        Top IP nguồn
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="topIPChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alert Types -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <span class="chart-title-icon">⚠️</span>
+                        Phân bố cảnh báo theo loại
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="alertTypeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== TABS: Alerts & Packets ========== -->
+        <section class="table-section">
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div class="table-card-title">
+                        📋 Giám sát chi tiết
+                    </div>
+                    <div class="tab-container">
+                        <button class="tab-btn active" data-tab="alertsTab">🚨 Cảnh báo <span class="alert-count-badge" id="alertCountBadge">0</span></button>
+                        <button class="tab-btn" data-tab="packetsTab">📦 Gói tin gần đây</button>
+                    </div>
+                </div>
+
+                <!-- Alerts Tab -->
+                <div class="tab-pane active" id="alertsTab">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Thời gian</th>
+                                    <th style="width: 120px;">Mức cảnh báo</th>
+                                    <th style="width: 140px;">Loại tấn công</th>
+                                    <th style="width: 140px;">IP nguồn</th>
+                                    <th>Mô tả</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertTableBody">
+                                <tr id="alertEmptyState">
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🛡️</div>
+                                            <div class="empty-state-text">Chưa có cảnh báo nào. Hệ thống đang giám sát...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Packets Tab -->
+                <div class="tab-pane" id="packetsTab">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">Thời gian</th>
+                                    <th style="width: 140px;">IP nguồn</th>
+                                    <th style="width: 140px;">IP đích</th>
+                                    <th style="width: 80px;">Protocol</th>
+                                    <th style="width: 80px;">Kích thước</th>
+                                    <th>Thông tin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packetTableBody">
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📡</div>
+                                            <div class="empty-state-text">Đang chờ gói tin...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <p>🛡️ Hệ thống Phát hiện Xâm nhập Mạng (IDS) | Python + Scapy + Flask | PBL4 Project</p>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="/static/js/dashboard.js"></script>
+
+</body>
+</html>

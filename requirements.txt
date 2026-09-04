@@ -1,0 +1,7 @@
+scapy==2.6.1
+flask==3.1.0
+flask-socketio==5.5.1
+colorama==0.4.6
+psutil==6.1.1
+python-socketio==5.16.4
+eventlet==0.41.2
