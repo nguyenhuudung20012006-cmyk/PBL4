@@ -1,3 +1,4 @@
+
 2026-08-28 10:22:27 | CRITICAL | [CRITICAL] SYN_FLOOD | IP: 192.168.1.105 | Phát hiện SYN Flood từ 192.168.1.105: 200 SYN packets trong 1s | Số SYN=200 | Ngưỡng=100 | Tốc độ=200 packets/s
 2026-08-28 10:22:42 | ERROR    | [HIGH] UDP_FLOOD | IP: 192.168.1.105 | Phát hiện UDP Flood từ 192.168.1.105: 300 UDP packets trong 1s | Số UDP=300 | Ngưỡng=200 | Tốc độ=300 packets/s
 2026-08-28 10:22:48 | WARNING  | [MEDIUM] ICMP_FLOOD | IP: 192.168.1.105 | Phát hiện ICMP Flood từ 192.168.1.105: 100 ICMP packets trong 1s | Số ICMP=100 | Ngưỡng=50 | Tốc độ=100 packets/s
@@ -8,17 +9,3 @@
 2026-09-04 09:30:51 | CRITICAL | [CRITICAL] SYN_FLOOD | IP: 192.168.1.105 | Phát hiện SYN Flood từ 192.168.1.105: 200 SYN packets trong 1s | Số SYN=200 | Ngưỡng=100 | Tốc độ=200 packets/s
 2026-09-04 09:31:10 | ERROR    | [HIGH] UDP_FLOOD | IP: 192.168.1.105 | Phát hiện UDP Flood từ 192.168.1.105: 300 UDP packets trong 1s | Số UDP=300 | Ngưỡng=200 | Tốc độ=300 packets/s
 2026-09-04 09:31:20 | WARNING  | [MEDIUM] ICMP_FLOOD | IP: 192.168.1.105 | Phát hiện ICMP Flood từ 192.168.1.105: 100 ICMP packets trong 1s | Số ICMP=100 | Ngưỡng=50 | Tốc độ=100 packets/s
-2026-09-04 09:48:28 | ERROR    | [HIGH] PORT_SCAN | IP: 192.168.1.100 | Phát hiện quét port từ 192.168.1.100: 25 port khác nhau trong 10s | Số port=25 | Ngưỡng=20 | Target IP=192.168.1.1
-2026-09-04 09:50:31 | ERROR    | [HIGH] PORT_SCAN | IP: 192.168.1.105 | Phát hiện quét port từ 192.168.1.105: 25 port khác nhau trong 10s | Số port=25 | Ngưỡng=20 | Target IP=192.168.1.1
-2026-09-04 09:50:34 | CRITICAL | [CRITICAL] SYN_FLOOD | IP: 192.168.1.105 | Phát hiện SYN Flood từ 192.168.1.105: 200 SYN packets trong 1s | Số SYN=200 | Ngưỡng=100 | Tốc độ=200 packets/s
-2026-09-04 09:50:38 | ERROR    | [HIGH] UDP_FLOOD | IP: 192.168.1.105 | Phát hiện UDP Flood từ 192.168.1.105: 300 UDP packets trong 1s | Số UDP=300 | Ngưỡng=200 | Tốc độ=300 packets/s
-2026-09-04 09:50:42 | WARNING  | [MEDIUM] ICMP_FLOOD | IP: 192.168.1.105 | Phát hiện ICMP Flood từ 192.168.1.105: 100 ICMP packets trong 1s | Số ICMP=100 | Ngưỡng=50 | Tốc độ=100 packets/s
-2026-09-04 10:01:12 | INFO     | Email cảnh báo đã gửi cho nguyenphong11689@gmail.com
-2026-09-04 10:03:14 | ERROR    | [HIGH] PORT_SCAN | IP: 192.168.1.105 | Phát hiện quét port từ 192.168.1.105: 25 port khác nhau trong 10s | Số port=25 | Ngưỡng=20 | Target IP=192.168.1.1
-2026-09-04 10:03:17 | CRITICAL | [CRITICAL] SYN_FLOOD | IP: 192.168.1.105 | Phát hiện SYN Flood từ 192.168.1.105: 200 SYN packets trong 1s | Số SYN=200 | Ngưỡng=100 | Tốc độ=200 packets/s
-2026-09-04 10:03:18 | INFO     | Email cảnh báo đã gửi cho nguyenphong11689@gmail.com
-2026-09-04 10:03:20 | INFO     | Email cảnh báo đã gửi cho nguyenphong11689@gmail.com
-2026-09-04 10:03:22 | ERROR    | [HIGH] UDP_FLOOD | IP: 192.168.1.105 | Phát hiện UDP Flood từ 192.168.1.105: 300 UDP packets trong 1s | Số UDP=300 | Ngưỡng=200 | Tốc độ=300 packets/s
-2026-09-04 10:03:25 | INFO     | Email cảnh báo đã gửi cho nguyenphong11689@gmail.com
-2026-09-04 10:03:26 | WARNING  | [MEDIUM] ICMP_FLOOD | IP: 192.168.1.105 | Phát hiện ICMP Flood từ 192.168.1.105: 100 ICMP packets trong 1s | Số ICMP=100 | Ngưỡng=50 | Tốc độ=100 packets/s
-2026-09-04 10:04:25 | WARNING  | [MEDIUM] ICMP_FLOOD | IP: 192.168.1.105 | Phát hiện ICMP Flood từ 192.168.1.105: 100 ICMP packets trong 1s | Số ICMP=100 | Ngưỡng=50 | Tốc độ=100 packets/s
