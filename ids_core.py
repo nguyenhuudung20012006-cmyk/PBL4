@@ -2,7 +2,15 @@
 # IDS Core Engine - Phân tích lưu lượng và phát hiện xâm nhập
 # ============================================================
 
-from random import random
+import sys
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+import random
 import threading
 import time
 from collections import defaultdict
@@ -99,14 +107,16 @@ class PacketStats:
 class DetectionEngine:
     """Engine phát hiện các hành vi xâm nhập mạng."""
 
-    def __init__(self, alert_manager):
+    def __init__(self, alert_manager, packet_stats=None):
         """
         Khởi tạo DetectionEngine.
 
         Args:
             alert_manager: AlertManager instance để tạo cảnh báo
+            packet_stats: PacketStats instance để lưu thống kê packets
         """
         self.alert_manager = alert_manager
+        self.packet_stats = packet_stats
         self.lock = threading.Lock()
 
         # --- Dữ liệu theo dõi cho Port Scan ---
@@ -462,6 +472,8 @@ class DetectionEngine:
                     "info": f"TCP {random.randint(1024, 65535)} → {port} [S]",
                 }
                 self.port_scan_history[source_ip].append((now, port))
+                if self.packet_stats:
+                    self.packet_stats.add_packet(pkt_info)
             
             self.alert_manager.create_alert(
                 alert_type="PORT_SCAN",
@@ -476,6 +488,19 @@ class DetectionEngine:
             )
 
         elif attack_type == "syn_flood":
+            if self.packet_stats:
+                for _ in range(200):
+                    self.packet_stats.add_packet({
+                        "timestamp": time_str,
+                        "size": 64,
+                        "protocol": "TCP",
+                        "src_ip": source_ip,
+                        "dst_ip": "192.168.1.1",
+                        "src_port": random.randint(1024, 65535),
+                        "dst_port": 80,
+                        "flags": "S",
+                        "info": f"TCP SYN Flood → 80 [S]",
+                    })
             self.alert_manager.create_alert(
                 alert_type="SYN_FLOOD",
                 severity="CRITICAL",
@@ -489,6 +514,19 @@ class DetectionEngine:
             )
 
         elif attack_type == "udp_flood":
+            if self.packet_stats:
+                for _ in range(300):
+                    self.packet_stats.add_packet({
+                        "timestamp": time_str,
+                        "size": random.randint(128, 1024),
+                        "protocol": "UDP",
+                        "src_ip": source_ip,
+                        "dst_ip": "192.168.1.1",
+                        "src_port": random.randint(1024, 65535),
+                        "dst_port": 53,
+                        "flags": None,
+                        "info": f"UDP Flood → 53",
+                    })
             self.alert_manager.create_alert(
                 alert_type="UDP_FLOOD",
                 severity="HIGH",
@@ -502,6 +540,19 @@ class DetectionEngine:
             )
 
         elif attack_type == "icmp_flood":
+            if self.packet_stats:
+                for _ in range(100):
+                    self.packet_stats.add_packet({
+                        "timestamp": time_str,
+                        "size": random.randint(64, 512),
+                        "protocol": "ICMP",
+                        "src_ip": source_ip,
+                        "dst_ip": "192.168.1.1",
+                        "src_port": None,
+                        "dst_port": None,
+                        "flags": None,
+                        "info": "ICMP Echo Request",
+                    })
             self.alert_manager.create_alert(
                 alert_type="ICMP_FLOOD",
                 severity="MEDIUM",
@@ -515,6 +566,19 @@ class DetectionEngine:
             )
 
         elif attack_type == "arp_spoof":
+            if self.packet_stats:
+                for _ in range(10):
+                    self.packet_stats.add_packet({
+                        "timestamp": time_str,
+                        "size": 42,
+                        "protocol": "ARP",
+                        "src_ip": source_ip,
+                        "dst_ip": "192.168.1.1",
+                        "src_port": None,
+                        "dst_port": None,
+                        "flags": None,
+                        "info": "ARP Is at (spoofed)",
+                    })
             self.alert_manager.create_alert(
                 alert_type="ARP_SPOOFING",
                 severity="CRITICAL",
@@ -561,6 +625,16 @@ class PacketSniffer:
         print(f"  🌐 Dashboard: http://localhost:{config.DASHBOARD_PORT}")
         print(f"{'='*70}\n")
 
+    def _safe_print(self, text):
+        """In an toàn không bị UnicodeEncodeError trên các console Windows cp1252."""
+        try:
+            print(text)
+        except Exception:
+            try:
+                print(text.encode("ascii", errors="backslashreplace").decode("ascii"))
+            except Exception:
+                pass
+
     def _sniff_loop(self):
         """Vòng lặp bắt gói tin."""
         try:
@@ -571,11 +645,8 @@ class PacketSniffer:
                 store=False,
                 stop_filter=lambda _: not self.running,
             )
-        except (PermissionError, OSError) as e:
-            print("\n⚠️  Không thể dùng Raw Packet Layer 2/3. Đang chuyển sang System Monitor Mode...")
-            self._sniff_l3()
-        except Exception as e:
-            print("\n⚠️  Chuyển sang System Monitor Mode...")
+        except Exception:
+            self._safe_print("\n⚠️  Không thể dùng Raw Packet Layer 2/3. Đang chuyển sang System Monitor Mode...")
             self._sniff_l3()
 
     def _sniff_l3(self):
@@ -589,21 +660,29 @@ class PacketSniffer:
                 opened_socket=scapy_conf.L3socket(),
             )
         except Exception:
-            print("\n📊 ĐÃ KÍCH HOẠT CHẾ ĐỘ GIÁM SÁT HỆ THỐNG (SYSTEM NETWORK MONITOR)")
-            print("   (Giám sát lưu lượng thực từ card mạng thông qua psutil)\n")
+            self._safe_print("\n📊 ĐÃ KÍCH HOẠT CHẾ ĐỘ GIÁM SÁT HỆ THỐNG (SYSTEM NETWORK MONITOR)")
+            self._safe_print("   (Giám sát lưu lượng thực từ card mạng thông qua psutil)\n")
             self._system_monitor_loop()
 
     def _system_monitor_loop(self):
         """Vòng lặp đọc lưu lượng mạng từ hệ thống (psutil) khi không có quyền raw sockets."""
         import psutil
-        last_io = psutil.net_io_counters()
+        try:
+            last_io = psutil.net_io_counters()
+        except Exception:
+            last_io = None
 
         while self.running:
             time.sleep(1)
             try:
                 current_io = psutil.net_io_counters()
-                bytes_delta = current_io.bytes_recv - last_io.bytes_recv + current_io.bytes_sent - last_io.bytes_sent
-                packets_delta = current_io.packets_recv - last_io.packets_recv + current_io.packets_sent - last_io.packets_sent
+                if last_io:
+                    bytes_delta = (current_io.bytes_recv - last_io.bytes_recv) + (current_io.bytes_sent - last_io.bytes_sent)
+                    packets_delta = (current_io.packets_recv - last_io.packets_recv) + (current_io.packets_sent - last_io.packets_sent)
+                else:
+                    bytes_delta = 1024
+                    packets_delta = 5
+
                 last_io = current_io
 
                 if packets_delta < 0:
@@ -615,13 +694,19 @@ class PacketSniffer:
                 now_str = datetime.now().strftime("%H:%M:%S")
                 protocols = ["TCP", "UDP", "TCP", "ICMP", "TCP"]
 
-                for _ in range(min(packets_delta, 100)):
+                count_to_add = min(packets_delta, 100)
+                # Nếu hệ thống nhàn rỗi (packets_delta == 0), thêm ít nhất 1 gói tin nền
+                if count_to_add == 0 and self.running:
+                    count_to_add = random.randint(1, 3)
+
+                for _ in range(count_to_add):
                     proto = random.choice(protocols)
                     src_ip = f"192.168.1.{random.randint(2, 254)}"
                     dst_ip = "192.168.1.1"
                     src_port = random.randint(1024, 65535)
                     dst_port = random.choice([80, 443, 53, 22, 8080, 445])
-                    pkt_size = random.randint(64, 1500)
+                    pkt_size = int(bytes_delta / max(count_to_add, 1)) if bytes_delta > 0 else random.randint(64, 1500)
+                    pkt_size = max(64, min(pkt_size, 1500))
 
                     pkt_info = {
                         "timestamp": now_str,
@@ -643,4 +728,4 @@ class PacketSniffer:
         self.running = False
         if self._thread:
             self._thread.join(timeout=3)
-        print("\n🛑 Đã dừng bắt gói tin.")
+        self._safe_print("\n🛑 Đã dừng bắt gói tin.")

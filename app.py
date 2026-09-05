@@ -33,7 +33,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 # --- Khởi tạo các components ---
 alert_manager = AlertManager(socketio=socketio)
 packet_stats = PacketStats()
-detection_engine = DetectionEngine(alert_manager=alert_manager)
+detection_engine = DetectionEngine(alert_manager=alert_manager, packet_stats=packet_stats)
 packet_sniffer = PacketSniffer(
     detection_engine=detection_engine,
     packet_stats=packet_stats,

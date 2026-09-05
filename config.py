@@ -62,13 +62,13 @@ ALERT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "alert
 # -----------------------------------------------------------
 # Email Configuration (SMTP) - Cấu hình email
 # -----------------------------------------------------------
-EMAIL_ENABLED = False  # Đặt True nếu muốn gửi email cảnh báo
+EMAIL_ENABLED = True  # Đặt True nếu muốn gửi email cảnh báo
 EMAIL_CONFIG = {
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587,
-    "sender_email": "your_email@gmail.com",
-    "sender_password": "your_app_password",  # Gmail App Password
-    "receiver_email": "admin@example.com",
+    "sender_email": "nguyenphong11689@gmail.com",
+    "sender_password": "cixd zncl smdc vvwe",  # Gmail App Password
+    "receiver_email": "nguyenphong11689@gmail.com",
 }
 
 # -----------------------------------------------------------
