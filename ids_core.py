@@ -619,10 +619,10 @@ class PacketSniffer:
         self._thread = threading.Thread(target=self._sniff_loop, daemon=True)
         self._thread.start()
         print(f"\n{'='*70}")
-        print(f"  🛡️  HỆ THỐNG IDS ĐÃ KHỞI ĐỘNG")
-        print(f"  📡 Interface: {config.NETWORK_INTERFACE or 'Tất cả'}")
-        print(f"  🔍 Filter: {config.PACKET_FILTER or 'Không'}")
-        print(f"  🌐 Dashboard: http://localhost:{config.DASHBOARD_PORT}")
+        print(f"   HỆ THỐNG IDS ĐÃ KHỞI ĐỘNG")
+        print(f"   Interface: {config.NETWORK_INTERFACE or 'Tất cả'}")
+        print(f"  Filter: {config.PACKET_FILTER or 'Không'}")
+        print(f"  Dashboard: http://localhost:{config.DASHBOARD_PORT}")
         print(f"{'='*70}\n")
 
     def _safe_print(self, text):
@@ -660,7 +660,7 @@ class PacketSniffer:
                 opened_socket=scapy_conf.L3socket(),
             )
         except Exception:
-            self._safe_print("\n📊 ĐÃ KÍCH HOẠT CHẾ ĐỘ GIÁM SÁT HỆ THỐNG (SYSTEM NETWORK MONITOR)")
+            self._safe_print("\n ĐÃ KÍCH HOẠT CHẾ ĐỘ GIÁM SÁT HỆ THỐNG (SYSTEM NETWORK MONITOR)")
             self._safe_print("   (Giám sát lưu lượng thực từ card mạng thông qua psutil)\n")
             self._system_monitor_loop()
 
